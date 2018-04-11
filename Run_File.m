@@ -5,11 +5,13 @@ function Run_File()
 	
 	if(isempty(P.FileName)) % A temporary option to set the path of a movie manually in the parameters to save time during development.
 		[file,path] = uigetfile('*.hdf5');
-		FileName = [path,file];
+		P.FileName = [path,file];
 	end
 	
-	[Time_Series_Features_Struct,Worms_Indices,featNames] = HDF5_2_MATLAB(P.FileName,P.Min_Frames_Number,P.Features_OnOff_Vector,P.Chosen_Worms_Indices);
-	
+	[Time_Series_Features_Struct,Time_Series_Features,Worms_Indices,featNames] = HDF5_2_MATLAB(P.FileName,P.Min_Frames_Number,P.Features_OnOff_Vector,P.Chosen_Worms_Indices);
+    assignin('base','Time_Series_Features',Time_Series_Features);
+    assignin('base','Time_Series_Features_Struct',Time_Series_Features_Struct);
+    
 	if(isempty(P.Chosen_Worms_Indices))
 		P.Chosen_Worms_Indices = [Time_Series_Features_Struct.worm_index];
 	end
