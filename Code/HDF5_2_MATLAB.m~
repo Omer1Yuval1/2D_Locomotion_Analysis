@@ -1,4 +1,4 @@
-function [Time_Series_Features_Struct,Time_Series_Features,Smoothed_Skeletons,Worms_Indices,featNames] = HDF5_2_MATLAB(fileName,minLength,featFlag,Chosen_Worms_Indices)
+function [Time_Series_Features_Struct,Time_Series_Features,Worms_Indices,featNames] = HDF5_2_MATLAB(fileName,minLength,featFlag,Chosen_Worms_Indices)
     
     % FEATSTRUCT2MAT imports the mean features from a tierpsy HDF5 feature file
     % and converts them into a feature matrix.  Features derived from
@@ -29,7 +29,7 @@ function [Time_Series_Features_Struct,Time_Series_Features,Smoothed_Skeletons,Wo
     % load feature data
     try
         featData = h5read(fileName, '/features_means');
-        Smoothed_Skeletons = h5read(fileName,'/coordinates/skeletons');
+        H1 = h5read(FileName,'/coordinates/skeletons');
     catch
         warning('Input file cannot be read. Possibly empty.')
         featMat = [];
