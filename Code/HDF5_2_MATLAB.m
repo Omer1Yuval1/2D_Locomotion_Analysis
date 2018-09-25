@@ -26,19 +26,28 @@ function [Time_Series_Features_Struct,Time_Series_Features,Smoothed_Skeletons,Wo
         error('featFlag must be a vector of logicals.')
     end
 
-    % load feature data
-    try
-        featData = h5read(fileName, '/features_means');
+    % Load feature data:
+    File_Info = h5info(fileName);
+    if(strcmp(File_Info.Datasets(1).Name,'blob_features')) % A hack to identify the new Tierpsy format (featuresN.hdf5).
+        
+		featData = h5read(fileName,'/features_means');
         Smoothed_Skeletons = h5read(fileName,'/coordinates/skeletons');
+        
+        Time_Series = h5read(fileName,'/timeseries_data');
+        Time_Series = Time_Series.timestamp;
+    
+	elseif(strcmp(File_Info.Datasets(1).Name,'features_means')) % A hack to identify the old Tierpsy format (features.hdf5).
+		featData = h5read(fileName,'/features_means');
+        Smoothed_Skeletons = h5read(fileName,'/coordinates/skeletons'); % More under coordinates: dorsal_contours,ventral_contours,widths.
         
         Time_Series = h5read(fileName,'/features_timeseries');
         Time_Series = Time_Series.timestamp;
-    catch
-        warning('Input file cannot be read. Possibly empty.')
+    else
+        warning('Input file cannot be read. Possibly empty.');
         featMat = [];
         wormInds = [];
         featNames = [];
-        return
+        return;
     end
     
     % get worm indices
@@ -52,7 +61,7 @@ function [Time_Series_Features_Struct,Time_Series_Features,Smoothed_Skeletons,Wo
     featNames(1:4) = []; % drop metadata fields
     
     % check featFlag length
-    if size(featNames, 1) ~= length(featFlag)
+    if size(featNames,1) ~= length(featFlag)
         error('featFlag must have the same length as number of features.');
     end
     
@@ -72,7 +81,7 @@ function [Time_Series_Features_Struct,Time_Series_Features,Smoothed_Skeletons,Wo
     end
 
     % drop short trajectories
-    featMat = featMat(trajLengths > minLength, :);
+    featMat = featMat(trajLengths > minLength,:);
 
     % Generate a time-series features struct:
     Time_Series_Features = h5read(fileName,'/features_timeseries');
