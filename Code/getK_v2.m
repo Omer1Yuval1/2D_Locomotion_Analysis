@@ -24,7 +24,7 @@
 % Run Example: [Kout,D_error,Success] = getK(X,Y,10^(-3),35,25,1);
 
 function [Kout,D_error,Success] = getK_v2(allX,allY,errTol,lastK,FPS,ArcLength)
-
+  Kv = lastK;
   [Nt,Np] = size(allX); % [# of time-points , # of midline points].
 
   % Parameters for upsampling
@@ -208,14 +208,14 @@ function [Kout,D_error,Success] = getK_v2(allX,allY,errTol,lastK,FPS,ArcLength)
               % torque
               COM_step(3) = COM_step(3) + 80*(3.4e-9/Tgrad)*Dt*(Torque/(sum(MA_mag)*CN(1,10)));
 
-              %Include test rotation and translation of COM
+              % Include test rotation and translation of COM
               x_local_rotated = x_local(:,i).*cos(COM_step(3)) - y_local(:,i).*sin(COM_step(3));
               y_local_rotated = x_local(:,i).*sin(COM_step(3)) + y_local(:,i).*cos(COM_step(3));
 
               dx = x_local_rotated + COM_step(1) - x_local(:,i-1);
               dy = y_local_rotated + COM_step(2) - y_local(:,i-1);
 
-              %Local axis angle is increased by current COM angle
+              % Local axis angle is increased by current COM angle
               rotation_angle = local_axis_angle(:,i) + COM_step(3);
               dl = dx.*cos(-rotation_angle) - dy.*sin(-rotation_angle);
               dn = dx.*sin(-rotation_angle) + dy.*cos(-rotation_angle);
@@ -263,10 +263,10 @@ function [Kout,D_error,Success] = getK_v2(allX,allY,errTol,lastK,FPS,ArcLength)
       end
 
       % Now must update candidate K
-      %{
-      plot(COM_actual(1,:),COM_actual(2,:),'k',COM_location(1,:),COM_location(2,:),'r')
-      axis equal
-      pause(0.2)
+      %
+      plot(COM_actual(1,:),COM_actual(2,:),'k',COM_location(1,:),COM_location(2,:),'r');
+      axis equal;
+      pause(0.2);
       %}
 
       D_simulated = sqrt((COM_location(1,end) - COM_location(1,1))^2 + (COM_location(2,end) - COM_location(2,1))^2);
@@ -277,6 +277,7 @@ function [Kout,D_error,Success] = getK_v2(allX,allY,errTol,lastK,FPS,ArcLength)
 
       K = K^(1-(D_error + 0.001*randn));
       loopCount = loopCount + 1;
+      Kv(end+1) = K;
 
       if Kout < 1.0
           Kout = 1;
@@ -291,4 +292,6 @@ function [Kout,D_error,Success] = getK_v2(allX,allY,errTol,lastK,FPS,ArcLength)
           Success = 0;
       end
   end
+  figure;
+  plot(length(Kv),Kv);
 end

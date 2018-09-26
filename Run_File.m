@@ -8,15 +8,14 @@ function Run_File()
 		P.FileName = [path,file];
 	end
 	
-	[Time_Series_Features_Struct,Time_Series_Features,Smoothed_Skeletons,Worms_Indices,featNames,Time_Series] = HDF5_2_MATLAB(P.FileName,P.Min_Frames_Number,P.Features_OnOff_Vector,P.Chosen_Worms_Indices);
-    assignin('base','Time_Series_Features',Time_Series_Features);
-    assignin('base','Time_Series_Features_Struct',Time_Series_Features_Struct);
-    assignin('base','Smoothed_Skeletons',Smoothed_Skeletons);
+	[Time_Series_Features_Individual_Objects,Time_Series_Features_Merged,Smoothed_Skeletons,Worms_Indices,featNames,Time_Series] = HDF5_2_MATLAB(P.FileName,P.Min_Frames_Number,P.Features_OnOff_Vector,P.Chosen_Worms_Indices);
+    assignin('base','Time_Series_Features_Merged',Time_Series_Features_Merged);
+    assignin('base','Time_Series_Features_Individual_Objects',Time_Series_Features_Individual_Objects);
     assignin('base','Time_Series',Time_Series);
     
 	if(isempty(P.Chosen_Worms_Indices))
-		P.Chosen_Worms_Indices = [Time_Series_Features_Struct.worm_index];
+		P.Chosen_Worms_Indices = [Time_Series_Features_Individual_Objects.worm_index];
 	end
 	
-	Plot_Time_Series_Feature(P.FileName,P.Feature_Name,Time_Series_Features_Struct,P.Chosen_Worms_Indices);
+	Plot_Time_Series_Feature(P.FileName,P.Feature_Name,Time_Series_Features_Individual_Objects,P.Chosen_Worms_Indices);
 end
