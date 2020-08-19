@@ -1,10 +1,14 @@
 function Plot_Curvature_Kymogram(Compact_Worm_Index,Time_Series_Features_Individual_Objects,FPS)
 	
-    % Run Example:
-	% Plot_Curvature_Kymogram(1,Time_Series_Features_Individual_Objects,FPS);
-	
+    % Run example:
+        % Plot_Curvature_Kymogram(1,Time_Series_Features_Individual_Objects,FPS);
+	% Save example:
+        % print(gcf,['wt_1_SP=0.99.svg'],'-dsvg','-painters');
+        
 	Max_Time = 15; % seconds.
 	Curvature_Min_Max = 0.010; % Curvature range. in micrometers.
+	SP = 0.8; % Smoothing parameter for K vs K' (smoothing spline). [0.8,0.99].
+	FontSize = 18;
 	
 	f1 = find([Time_Series_Features_Individual_Objects.Compact_Worm_Index] == Compact_Worm_Index);
 	
@@ -62,8 +66,8 @@ function Plot_Curvature_Kymogram(Compact_Worm_Index,Time_Series_Features_Individ
 	ylim([2,Np-1]);
 	axis on;
 	xlabel('Time [s]','Interpreter','Latex');
-	%set(gca,'YDir','normal','XTick',1:50:Nt+1,'XTickLabels',(0:50:Nt)./FPS,'YTick',[2,Np-3],'YTickLabels',{'H','T'},'FontSize',18,'TickLabelInterpreter','latex');
-    set(gca,'YDir','reverse','XTick',1:(FPS):(Max_Time*FPS+1),'XTickLabels',(0:FPS:(Max_Time*FPS))./FPS,'YTick',[2,Np-1],'YTickLabels',{'H','T'},'FontSize',18,'TickLabelInterpreter','latex');
+	%set(gca,'YDir','normal','XTick',1:50:Nt+1,'XTickLabels',(0:50:Nt)./FPS,'YTick',[2,Np-3],'YTickLabels',{'H','T'},'FontSize',FontSize,'TickLabelInterpreter','latex');
+    set(gca,'YDir','reverse','XTick',1:(FPS):(Max_Time*FPS+1),'XTickLabels',(0:FPS:(Max_Time*FPS))./FPS,'YTick',[2,Np-1],'YTickLabels',{'H','T'},'FontSize',FontSize,'TickLabelInterpreter','latex');
 	% colormap(gca,'jet');
 	set(gcf,'Units','Normalized','Position',[0.01,0.3,0.9,0.45]);
 	set(gca,'Position',[0.025,0.18,0.96,0.78]);
@@ -72,7 +76,7 @@ function Plot_Curvature_Kymogram(Compact_Worm_Index,Time_Series_Features_Individ
 	%{
 	figure;
 	%colorbar(gca,'Ticks',0,'TickLabels',{'$$\kappa=0$$'},'TickLabelInterpreter','latex');
-    colorbar(gca,'Ticks',[0,max(C(:))],'TickLabels',{['$$',num2str(-Curvature_Min_Max),'\; [mm ^{-1}]$$'],['$$',num2str(Curvature_Min_Max(1)),'\; [mm ^{-1}]$$']},'FontSize',18,'TickLabelInterpreter','latex');
+    colorbar(gca,'Ticks',[0,max(C(:))],'TickLabels',{['$$',num2str(-Curvature_Min_Max),'\; [mm ^{-1}]$$'],['$$',num2str(Curvature_Min_Max(1)),'\; [mm ^{-1}]$$']},'FontSize',FontSize,'TickLabelInterpreter','latex');
 	set(gcf,'Units','Normalized','Position',[0.01,0.3,0.9,0.45]);
 	set(gca,'Position',[0.025,0.18,0.5,0.78]);
 	%}
@@ -92,13 +96,30 @@ function Plot_Curvature_Kymogram(Compact_Worm_Index,Time_Series_Features_Individ
 	
 	% Plot K vs K'
 	% ************
-	% fit c(t)
-	% Fc = fit(1:size(C,2),C(i),'smoothingspline','smoothingparam','0.9);
-	% der(Fc);
-	% find derivative
-	% plot K vs K'
-	% xx = ;
-	% plot(Fc(xx),Fcc(xx));
+	H2 = figure;
+	set(H2,'WindowState','maximized');
+	Vp = [10,20,30,40];
+	for i=1:length(Vp)
+		F = fit((1:Nt)',C(:,Vp(i)),'smoothingspline','smoothingparam',SP);
+		xx = linspace(1,Nt,200*Nt);
+		Fx = differentiate(F,xx);
+        % figure; plot((1:Nt)',C(:,Vp(i))); hold on; plot(xx,F(xx)); % Used to compare the fit and raw data.
+		
+		subplot(2,2,i);
+		scatter(F(xx),Fx,5,jet(length(xx)),'filled'); % plot K vs K'.
+		xlabel('$$\kappa$$','Interpreter','Latex');
+		ylabel('$$\dot{\kappa}  $$','Interpreter','Latex');
+		title(['$$u = ',num2str(round(Vp(i)./Np,1)),'$$'],'Interpreter','Latex');
+		
+		switch(SP)
+		case 0.8
+			axis([-0.2,1.2,-0.6,0.6]);
+			set(gca,'FontSize',FontSize,'YTick',[-0.6:0.2:0.6],'TickLabelInterpreter','latex');
+		case 0.99
+			axis([-0.2,1.2,-1.2,1.2]);
+			set(gca,'FontSize',FontSize,'YTick',[-1.2:0.2:1.2],'TickLabelInterpreter','latex');
+		end
+	end
 	
 	% Radius of curvature
 	% *******************
