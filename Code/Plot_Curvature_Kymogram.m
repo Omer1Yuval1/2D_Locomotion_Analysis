@@ -9,10 +9,13 @@ function Plot_Curvature_Kymogram(Compact_Worm_Index,Time_Series_Features_Individ
 	
 	XLIM = 10; % Seconds.
 	Max_Time = 10; % Seconds.
+	Start_Time = 2; % Seconds.
+	
 	Curvature_Min_Max = 0.01; % Curvature range. in micrometers.
 	SP = 0.8; % Smoothing parameter for K vs K' (smoothing spline). [0.8,0.99].
 	smoothn_SP = 10;
 	FontSize = 18;
+	F0 = Start_Time .* FPS;
 	
 	f1 = find([Time_Series_Features_Individual_Objects.Compact_Worm_Index] == Compact_Worm_Index);
 	
@@ -33,7 +36,7 @@ function Plot_Curvature_Kymogram(Compact_Worm_Index,Time_Series_Features_Individ
 	Fx = [];
 	Fxx = [];
 	for t=1:Max_Frames
-		XY = cell2mat(smoothn(num2cell([X(t,:)',Y(t,:)'],1),smoothn_SP));
+		XY = cell2mat(smoothn(num2cell([X(t+F0,:)',Y(t+F0,:)'],1),smoothn_SP));
 		[XY,~,~,Skel_Fit_Object] = Distribute_Equidistantly(XY,Np,1000); % [Nx3].
 		X1(t,:) = XY(:,1);
 		Y1(t,:) = XY(:,2);
