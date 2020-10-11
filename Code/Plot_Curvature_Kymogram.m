@@ -9,7 +9,7 @@ function Plot_Curvature_Kymogram(Compact_Worm_Index,Time_Series_Features_Individ
 	
 	XLIM = 10; % Seconds.
 	Max_Time = 10; % Seconds.
-	Start_Time = 10; % Seconds.
+	Start_Time = 0; % Seconds.
 	
 	Curvature_Min_Max = 0.01; % Curvature range. in micrometers.
 	SP = 0.8; % Smoothing parameter for K vs K' (smoothing spline). [0.8,0.99].
@@ -38,9 +38,11 @@ function Plot_Curvature_Kymogram(Compact_Worm_Index,Time_Series_Features_Individ
 	for t=1:Max_Frames
 		if(t+F0 <= Nt) % If the current frame is within the clip frame range.
 			XY = cell2mat(smoothn(num2cell([X(t+F0,:)',Y(t+F0,:)'],1),smoothn_SP));
-			[XY,~,~,Skel_Fit_Object] = Distribute_Equidistantly(XY,Np,1000); % [Nx3].
-			X1(t,:) = XY(:,1);
-			Y1(t,:) = XY(:,2);
+            if(~all(isnan(XY(:)),'all'))
+                [XY,~,~,~] = Distribute_Equidistantly(XY,Np,1000); % [Nx3].
+                X1(t,:) = XY(:,1);
+                Y1(t,:) = XY(:,2);
+            end
 		end
 	end
 	X = X1;
